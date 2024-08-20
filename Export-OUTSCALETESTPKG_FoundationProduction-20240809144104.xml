@@ -1,0 +1,1895 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Ubuntu Server LTS for x86-64 Containers) 2024.1 (Build 267.2U)" ts="2024-08-09 14:43:33">
+<Class name="DTLAppointment.SIUtoFHIR">
+<Description>
+</Description>
+<Super>Ens.BusinessProcessBPL</Super>
+<TimeChanged>67011,48023.857700537</TimeChanged>
+<TimeCreated>66921,44431.347222379</TimeCreated>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+</Storage>
+
+<XData name="BPL">
+<Description>
+BPL Definition</Description>
+<XMLNamespace>http://www.intersystems.com/bpl</XMLNamespace>
+<Data><![CDATA[
+<process language='objectscript' request='EnsLib.HL7.Message' response='Ens.Response' height='2000' width='2000' >
+<context>
+<property name='TStream' type='Ens.StreamContainer' instantiate='0' />
+<property name='test' type='EnsLib.HL7.Message' instantiate='0' />
+<property name='xxl2' type='EnsLib.HL7.Message' instantiate='0' />
+<property name='BStream' type='HS.Message.XMLMessage' instantiate='0' />
+<property name='TStreamPractionner' type='Ens.StreamContainer' instantiate='0' />
+<property name='TStreamTot' type='Ens.StreamContainer' instantiate='0' />
+</context>
+<sequence xend='200' yend='650' >
+<transform name='transformation tot' class='DTLtest.HL7FHIR.SIUtofhirV2' source='request' target='context.TStreamTot' xpos='200' ypos='250' />
+<code xpos='200' ypos='350' >
+<![CDATA[  set tSDA3Object = context.TStreamTot
+     Set tQuickStream = ##class(HS.SDA3.QuickStream).%New()
+
+    $$$ThrowOnError(tSDA3Object.XMLExportToStream(.tQuickStream))
+     $$$LOGINFO("wafik dcbjkfcjf")
+
+    $$$LOGINFO("tQuickStream wafik 123455 :  "_tQuickStream.Read())
+
+
+       set pResponsewafik = ##class(HS.Message.XMLMessage).%New()
+       Do pResponsewafik.AdditionalInfo.SetAt(tQuickStream.%Id(),"QuickStreamId")
+           Do pResponsewafik.AdditionalInfo.SetAt(tSDA3Object.Patient.MPIID,"PatientResourceId")
+           
+           //Do pResponsewafik.AdditionalInfo.SetAt("1236545555","EncounterNumber")
+           
+        //wafik ajout
+         set context.xxl2 = ##class(EnsLib.EDI.XML.Document).%New(tQuickStream)
+
+         //set tSC = ..SendRequestSync("RoutingEnginetest1",xxl2)
+
+    //type 2
+
+    set xx = ##class(Ens.StreamContainer).%New()
+    set xx.Stream = tQuickStream.Read()
+    //set xx.Type = "FC"]]]]><![CDATA[>
+</code>
+<call name='SDA_FHIR' target='HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process' async='1' xpos='200' ypos='450' >
+<request type='Ens.StreamContainer' >
+<assign property="callrequest" value="pResponsewafik" action="set" />
+</request>
+<response type='Ens.Response' />
+</call>
+<call name='SDA_FHIR2' target='HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process2' async='1' xpos='200' ypos='550' disabled="true">
+<request type='Ens.StreamContainer' >
+<assign property="callrequest" value="pResponsewafik" action="set" />
+</request>
+<response type='Ens.Response' />
+</call>
+</sequence>
+</process>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="DTLtest.HL7FHIR.SIUtofhirV2">
+<Super>Ens.DataTransformDTL</Super>
+<TimeChanged>66953,53999.733066058</TimeChanged>
+<TimeCreated>66921,39377.991661427</TimeCreated>
+<DependsOn>EnsLib.HL7.Message,HS.SDA3.Container</DependsOn>
+
+<Parameter name="IGNOREMISSINGSOURCE">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="REPORTERRORS">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="TREATEMPTYREPEATINGFIELDASNULL">
+<Default>0</Default>
+</Parameter>
+
+<XData name="DTL">
+<XMLNamespace>http://www.intersystems.com/dtl</XMLNamespace>
+<Data><![CDATA[
+<transform sourceClass='EnsLib.HL7.Message' targetClass='HS.SDA3.Container' sourceDocType='2.5:SIU_S12' create='new' language='objectscript' >
+<subtransform class='HS.Hub.Standalone.HL7.DTL.SubTransform.PD1ToSDA3' targetObj='target' sourceObj='source.{PIDgrp(1).PD1}' />
+<assign value='source.{PIDgrp(1).PID:PatientIdentifierList(1).IDNumber}' property='target.Patient.MPIID' action='set' disabled='1' />
+<assign value='source.{PIDgrp(1).PID:PatientName(1).FamilyName}' property='target.Patient.Name.FamilyName' action='set' disabled='1' />
+<assign value='source.{PIDgrp(1).PID:PatientName(1).GivenName}' property='target.Patient.Name.GivenName' action='set' disabled='1' />
+<assign value='source.{PIDgrp(1).PID:BirthPlace}' property='target.Patient.BirthPlace' action='set' disabled='1' />
+<assign value='source.{PIDgrp(1).PID:PatientName(1).Suffix}' property='target.Patient.Name.NameSuffix' action='set' disabled='1' />
+<assign value='source.{PIDgrp(1).PID:PatientName(1).Prefix}' property='target.Patient.Name.NamePrefix' action='set' />
+<assign value='source.{PIDgrp(1).PID:DateTimeofBirth.Time}' property='target.Patient.BirthTime' action='set' />
+<assign value='source.{PIDgrp(1).PID:AdministrativeSex}' property='target.Patient.Gender' action='set' />
+<assign value='source.{PIDgrp(1).PID:PatientName(1).NameTypeCode}' property='target.Patient.Name.Type' action='set' />
+<assign value='source.{PIDgrp(1).PD1}' property='HS.Hub.Standalone.HL7.DTL.SubTransform.PD1ToSDA3' action='set' disabled='1' />
+<assign value='source.{PIDgrp(1).PV1:AssignedPatientLocation}' property='target.Encounters.(1).Locations.(1)' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AssignedPatientLocation.PersonLocationType}' property='target.Encounters.(1).Locations.(1).LocationDetail.PhysicalType' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AssignedPatientLocation.LocationStatus}' property='target.Encounters.(1).Locations.(1).LocationDetail.Status' action='set' />
+<assign value='source.{PIDgrp(1).PV1:PreadmitNumber.IDNumber}' property='target.Encounters.(1).EncounterNumber' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AdmissionType}' property='target.Encounters.(1).AdmissionType.Code' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AdmittingDoctor(1).IDNumber}' property='target.Encounters.(1).AdmittingClinician.Code' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AdmittingDoctor(1).FamilyName.Surname}' property='target.Encounters.(1).AdmittingClinician.Name.FamilyName' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AdmittingDoctor(1).FamilyName.OwnSurnamePrefix}' property='target.Encounters.(1).AdmittingClinician.Name.FamilyNamePrefix' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AdmittingDoctor(1).Prefix}' property='target.Encounters.(1).AdmittingClinician.Name.NamePrefix' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AdmittingDoctor(1).Suffix}' property='target.Encounters.(1).AdmittingClinician.Name.NameSuffix' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AdmittingDoctor(1).GivenName}' property='target.Encounters.(1).AdmittingClinician.Name.GivenName' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AdmittingDoctor(1).ProfessionalSuffix}' property='target.Encounters.(1).AdmittingClinician.Name.ProfessionalSuffix' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AdmittingDoctor(1).NameTypeCode}' property='target.Encounters.(1).AdmittingClinician.Name.Type' action='set' />
+<subtransform class='HS.Hub.Standalone.HL7.DTL.SubTransform.PIDToSDA3' targetObj='target' sourceObj='source.{PIDgrp(1).PID}' />
+<foreach property='source.{PIDgrp(1).PV1:AttendingDoctor()}' key='k1' >
+<assign value='source.{PIDgrp(1).PV1:AttendingDoctor(k1).FamilyName.OwnSurname}' property='target.Encounters.(1).AttendingClinicians.(1).Name.FamilyName' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AttendingDoctor(k1).Prefix}' property='target.Encounters.(1).AttendingClinicians.(1).Name.NamePrefix' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AttendingDoctor(k1).Suffix}' property='target.Encounters.(1).AttendingClinicians.(1).Name.NameSuffix' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AttendingDoctor(k1).GivenName}' property='target.Encounters.(1).AttendingClinicians.(1).Name.GivenName' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AttendingDoctor(k1).ProfessionalSuffix}' property='target.Encounters.(1).AttendingClinicians.(1).Name.ProfessionalSuffix' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AttendingDoctor(k1).NameTypeCode}' property='target.Encounters.(1).AttendingClinicians.(1).Name.Type' action='set' />
+</foreach>
+<assign value='source.{PIDgrp(1).PV1:ReferringDoctor(1).IDNumber}' property='target.Encounters.(1).ReferringClinician.Code' action='set' />
+<assign value='source.{PIDgrp(1).PV1:ReferringDoctor(1).FamilyName.OwnSurname}' property='target.Encounters.(1).ReferringClinician.Name.FamilyName' action='set' />
+<assign value='source.{PIDgrp(1).PV1:ReferringDoctor(1).FamilyName.OwnSurnamePrefix}' property='target.Encounters.(1).ReferringClinician.Name.FamilyNamePrefix' action='set' />
+<assign value='source.{PIDgrp(1).PV1:ReferringDoctor(1).GivenName}' property='target.Encounters.(1).ReferringClinician.Name.GivenName' action='set' />
+<assign value='source.{PIDgrp(1).PV1:ReferringDoctor(1).ProfessionalSuffix}' property='target.Encounters.(1).ReferringClinician.Name.ProfessionalSuffix' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AdmitSource}' property='target.Encounters.(1).AdmissionSource.Code' action='set' />
+<assign value='source.{PIDgrp(1).PV1:VisitNumber.AssigningAuthority.UniversalID}' property='target.Encounters.(1).EncounterMRN' action='set' />
+<foreach property='source.{PIDgrp(1).PV1:ConsultingDoctor()}' key='T3' >
+<assign value='source.{PIDgrp(1).PV1:ConsultingDoctor(T3).FamilyName.OwnSurname}' property='target.Encounters.(1).ConsultingClinicians.(T3).Name.FamilyName' action='set' />
+<assign value='source.{PIDgrp(1).PV1:ConsultingDoctor(T3).FamilyName.OwnSurnamePrefix}' property='target.Encounters.(1).ConsultingClinicians.(T3).Name.FamilyNamePrefix' action='set' />
+<assign value='source.{PIDgrp(1).PV1:ConsultingDoctor(T3).IDNumber}' property='target.Encounters.(1).ConsultingClinicians.(T3).Code' action='set' />
+<assign value='source.{PIDgrp(1).PV1:ConsultingDoctor(T3).GivenName}' property='target.Encounters.(1).ConsultingClinicians.(T3).Name.GivenName' action='set' />
+<assign value='source.{PIDgrp(1).PV1:ConsultingDoctor(T3).ProfessionalSuffix}' property='target.Encounters.(1).ConsultingClinicians.(T3).Name.ProfessionalSuffix' action='set' />
+<assign value='source.{PIDgrp(1).PV1:ConsultingDoctor(T3).NameTypeCode}' property='target.Encounters.(1).ConsultingClinicians.(T3).Name.Type' action='set' />
+</foreach>
+<assign value='source.{PIDgrp(1).PV1:BedStatus}' property='target.Encounters.(1).Status.Code' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AdmitSource}' property='target.Encounters.(1).AdmissionSource.Code' action='set' />
+<assign value='source.{PIDgrp(1).PV1:VisitNumber.AssigningAuthority.UniversalID}' property='target.Encounters.(1).EncounterMRN' action='set' />
+<assign value='source.{PIDgrp(1).PV1:AttendingDoctor(1).IDNumber}' property='target.Encounters.(1).AttendingClinicians.(1).Code' action='set' />
+<assign value='source.{PIDgrp(1).PV1:ReferringDoctor(1).IDNumber}' property='target.Encounters.(1).ReferringClinician.Code' action='set' />
+<assign value='source.{PIDgrp(1).PV1:ConsultingDoctor(1).IDNumber}' property='target.Encounters.(1).ConsultingClinicians.(1).Code' action='set' />
+<assign value='source.{SCH:PlacerAppointmentID.EntityIdentifier}' property='target.Appointments.(1).ExternalId' action='set' />
+<assign value='source.{SCH:PlacerAppointmentID.EntityIdentifier}' property='target.Appointments.(1).FillerOrderId' action='set' />
+<assign value='source.{SCH:AppointmentTimingQuantity(1).StartDateTime}' property='FromTime' action='set' />
+<code>
+<![CDATA[  set annee = $EXTRACT(FromTime,1,4)
+  set mois = $EXTRACT(FromTime,5,6)
+  set jour = $EXTRACT(FromTime,7,8)
+  set heure = $EXTRACT(FromTime,9,10)
+  set minute = $EXTRACT(FromTime,11,12)
+  set seconde= $EXTRACT(FromTime,13,*)
+  set datefinal1 = annee_"-"_mois_"-"_jour_"T"_heure_":"_minute_":"_seconde
+
+
+
+    $$$LOGINFO("datefinal1  : "_datefinal1 )
+]]]]><![CDATA[></code>
+<assign value='datefinal1' property='target.Appointments.(1).FromTime' action='set' />
+<assign value='source.{SCH:AppointmentTimingQuantity(1).EndDateTime}' property='totime' action='set' />
+<code>
+<![CDATA[  set annee = $EXTRACT(totime,1,4)
+  set mois = $EXTRACT(totime,5,6)
+  set jour = $EXTRACT(totime,7,8)
+  set heure = $EXTRACT(totime,9,10)
+  set minute = $EXTRACT(totime,11,12)
+  set seconde= $EXTRACT(totime,13,*)
+  set datefinal = annee_"-"_mois_"-"_jour_"T"_heure_":"_minute_":"_seconde
+
+
+
+    $$$LOGINFO("datefinal  : "_datefinal )
+]]]]><![CDATA[></code>
+<assign value='datefinal' property='target.Appointments.(1).ToTime' action='set' />
+<assign value='source.{SCH:AppointmentType}' property='target.Appointments.(1).Type' action='set' />
+<assign value='source.{PIDgrp(1).PV1:PreadmitNumber.IDNumber}' property='target.Appointments.(1).EncounterNumber' action='set' />
+<assign value='source.{SCH:FillerStatusCode}' property='target.Appointments.(1).Status' action='set' />
+<assign value='source.{SCH:EnteredByPerson(1).FamilyName}' property='target.Appointments.(1).CareProvider.Name.FamilyName' action='set' />
+<assign value='source.{SCH:EnteredByPerson(1).GivenName}' property='target.Appointments.(1).CareProvider.Name.GivenName' action='set' />
+<assign value='source.{SCH:EnteredByPerson(1).IDNumber}' property='target.Appointments.(1).CareProvider.EId' action='set' />
+<assign value='source.{SCH:EnteredByPerson(1).ProfessionalSuffix}' property='target.Appointments.(1).CareProvider.Name.ProfessionalSuffix' action='set' />
+<assign value='source.{RGSgrp(1).AILgrp(1).AIL:LocationTypeAIL.Identifier}' property='target.Appointments.(1).Location.LocationType' action='set' />
+<assign value='source.{RGSgrp(1).AISgrp(1).AIS:SegmentActionCode}' property='target.Appointments.(1).ActionCode' action='set' />
+</transform>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="DTLtest.HL7FHIR.hl7tofhirV2">
+<Super>Ens.DataTransformDTL</Super>
+<TimeChanged>66931,44788.516145163</TimeChanged>
+<TimeCreated>66542,59496.353444792</TimeCreated>
+<DependsOn>EnsLib.HL7.Message,HS.SDA3.Container</DependsOn>
+
+<Parameter name="IGNOREMISSINGSOURCE">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="REPORTERRORS">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="TREATEMPTYREPEATINGFIELDASNULL">
+<Default>0</Default>
+</Parameter>
+
+<XData name="DTL">
+<XMLNamespace>http://www.intersystems.com/dtl</XMLNamespace>
+<Data><![CDATA[
+<transform sourceClass='EnsLib.HL7.Message' targetClass='HS.SDA3.Container' sourceDocType='2.5:ADT_A01' create='new' language='objectscript' >
+<subtransform class='HS.Hub.Standalone.HL7.DTL.SubTransform.PIDToSDA3' targetObj='target' sourceObj='source.{PID}' />
+<comment>
+<annotation>Cryptage des données patient :
+-Nom
+-Prénom
+-Date de naissance
+-sexe
+-adresse</annotation>
+</comment>
+<assign value='target.Patient.Name.FamilyName' property='familyName' action='set' />
+<assign value='target.Patient.Name.GivenName' property='givenName' action='set' />
+<assign value='target.Patient.MothersMaidenName' property='maidenName' action='set' />
+<assign value='target.Patient.Gender' property='gender' action='set' />
+<assign value='source.{PID:PatientIdentifierList(1).IDNumber}' property='target.Patient.MPIID' action='set' />
+<subtransform class='HS.Hub.Standalone.HL7.DTL.SubTransform.PD1ToSDA3' targetObj='target' sourceObj='source.{PD1}' />
+<assign value='source.{PV1:PreadmitNumber.IDNumber}' property='target.Encounters.(1).EncounterNumber' action='set' />
+<assign value='source.{PV1:AdmissionType}' property='target.Encounters.(1).AdmissionType.Code' action='set' />
+<assign value='source.{PV1:AdmittingDoctor(1).IDNumber}' property='target.Encounters.(1).AdmittingClinician.Code' action='set' />
+<assign value='source.{PV1:AdmittingDoctor(1).FamilyName.Surname}' property='target.Encounters.(1).AdmittingClinician.Name.FamilyName' action='set' />
+<assign value='source.{PV1:AdmittingDoctor(1).FamilyName.OwnSurnamePrefix}' property='target.Encounters.(1).AdmittingClinician.Name.FamilyNamePrefix' action='set' />
+<assign value='source.{PV1:AdmittingDoctor(1).Prefix}' property='target.Encounters.(1).AdmittingClinician.Name.NamePrefix' action='set' />
+<assign value='source.{PV1:AdmittingDoctor(1).Suffix}' property='target.Encounters.(1).AdmittingClinician.Name.NameSuffix' action='set' />
+<assign value='source.{PV1:AdmittingDoctor(1).GivenName}' property='target.Encounters.(1).AdmittingClinician.Name.GivenName' action='set' />
+<assign value='source.{PV1:AdmittingDoctor(1).ProfessionalSuffix}' property='target.Encounters.(1).AdmittingClinician.Name.ProfessionalSuffix' action='set' />
+<assign value='source.{PV1:AdmittingDoctor(1).NameTypeCode}' property='target.Encounters.(1).AdmittingClinician.Name.Type' action='set' />
+<foreach property='source.{PV1:AttendingDoctor()}' key='T2' >
+<assign value='source.{PV1:AttendingDoctor(T2).FamilyName.OwnSurname}' property='target.Encounters.(1).AttendingClinicians.(T2).Name.FamilyName' action='set' />
+<assign value='source.{PV1:AttendingDoctor(T2).FamilyName.OwnSurnamePrefix}' property='target.Encounters.(1).AttendingClinicians.(T2).Name.FamilyNamePrefix' action='set' />
+<assign value='source.{PV1:AttendingDoctor(T2).Prefix}' property='target.Encounters.(1).AttendingClinicians.(T2).Name.NamePrefix' action='set' />
+<assign value='source.{PV1:AttendingDoctor(T2).Suffix}' property='target.Encounters.(1).AttendingClinicians.(T2).Name.NameSuffix' action='set' />
+<assign value='source.{PV1:AttendingDoctor(T2).GivenName}' property='target.Encounters.(1).AttendingClinicians.(T2).Name.GivenName' action='set' />
+<assign value='source.{PV1:AttendingDoctor(T2).ProfessionalSuffix}' property='target.Encounters.(1).AttendingClinicians.(T2).Name.ProfessionalSuffix' action='set' />
+<assign value='source.{PV1:AttendingDoctor(T2).NameTypeCode}' property='target.Encounters.(1).AttendingClinicians.(T2).Name.Type' action='set' />
+</foreach>
+<foreach property='source.{PV1:ConsultingDoctor()}' key='T3' >
+<assign value='source.{PV1:ConsultingDoctor(T3).FamilyName.OwnSurname}' property='target.Encounters.(1).ConsultingClinicians.(T3).Name.FamilyName' action='set' />
+<assign value='source.{PV1:ConsultingDoctor(T3).FamilyName.OwnSurnamePrefix}' property='target.Encounters.(1).ConsultingClinicians.(T3).Name.FamilyNamePrefix' action='set' />
+<assign value='source.{PV1:ConsultingDoctor(T3).Prefix}' property='target.Encounters.(1).ConsultingClinicians.(T3).Name.NamePrefix' action='set' />
+<assign value='source.{PV1:ConsultingDoctor(T3).Suffix}' property='target.Encounters.(1).ConsultingClinicians.(T3).Name.NameSuffix' action='set' />
+<assign value='source.{PV1:ConsultingDoctor(T3).IDNumber}' property='target.Encounters.(1).ConsultingClinicians.(T3).Code' action='set' />
+<assign value='source.{PV1:ConsultingDoctor(T3).GivenName}' property='target.Encounters.(1).ConsultingClinicians.(T3).Name.GivenName' action='set' />
+<assign value='source.{PV1:ConsultingDoctor(T3).ProfessionalSuffix}' property='target.Encounters.(1).ConsultingClinicians.(T3).Name.ProfessionalSuffix' action='set' />
+<assign value='source.{PV1:ConsultingDoctor(T3).NameTypeCode}' property='target.Encounters.(1).ConsultingClinicians.(T3).Name.Type' action='set' />
+</foreach>
+<assign value='source.{PV1:ReferringDoctor(1).IDNumber}' property='target.Encounters.(1).ReferringClinician.Code' action='set' />
+<assign value='source.{PV1:ReferringDoctor(1).FamilyName.OwnSurname}' property='target.Encounters.(1).ReferringClinician.Name.FamilyName' action='set' />
+<assign value='source.{PV1:ReferringDoctor(1).FamilyName.OwnSurnamePrefix}' property='target.Encounters.(1).ReferringClinician.Name.FamilyNamePrefix' action='set' />
+<assign value='source.{PV1:ReferringDoctor(1).Prefix}' property='target.Encounters.(1).ReferringClinician.Name.NamePrefix' action='set' />
+<assign value='source.{PV1:ReferringDoctor(1).Suffix}' property='target.Encounters.(1).ReferringClinician.Name.NameSuffix' action='set' />
+<assign value='source.{PV1:ReferringDoctor(1).GivenName}' property='target.Encounters.(1).ReferringClinician.Name.GivenName' action='set' />
+<assign value='source.{PV1:ReferringDoctor(1).ProfessionalSuffix}' property='target.Encounters.(1).ReferringClinician.Name.ProfessionalSuffix' action='set' />
+<assign value='source.{PV1:ReferringDoctor(1).NameTypeCode}' property='target.Encounters.(1).ReferringClinician.Name.Type' action='set' />
+<assign value='source.{PV1:AdmitSource}' property='target.Encounters.(1).AdmissionSource.Code' action='set' />
+<assign value='source.{PV1:VisitNumber.AssigningAuthority.UniversalID}' property='target.Encounters.(1).EncounterMRN' action='set' />
+<assign value='source.{PV1:AdmitDateTime}' property='target.Encounters.(1).FromTime' action='set' disabled='1' />
+<assign value='source.{PV1:DischargeDateTime(1).Time}' property='target.Encounters.(1).ToTime' action='set' disabled='1' />
+<assign value='source.{PV1:BedStatus}' property='target.Encounters.(1).Status.Code' action='set' />
+<assign value='source.{PID:PatientName(1).FamilyName}' property='target.Patient.Name.FamilyName' action='set' disabled='1' />
+<assign value='source.{PID:PatientName(1).Prefix}' property='target.Patient.Name.NamePrefix' action='set' disabled='1' />
+<assign value='source.{PID:PatientName(1).Suffix}' property='target.Patient.Name.NameSuffix' action='set' disabled='1' />
+<assign value='source.{PID:PatientName(1).NameTypeCode}' property='target.Patient.Name.Type' action='set' disabled='1' />
+<assign value='source.{PID:MothersMaidenName(1).FamilyName.Surname}' property='target.Patient.MothersMaidenName' action='set' disabled='1' />
+<assign value='source.{PID:PatientName(1).GivenName}' property='target.Patient.Name.GivenName' action='set' disabled='1' />
+<assign value='source.{PID:AdministrativeSex}' property='target.Patient.Gender.Code' action='set' disabled='1' />
+<comment>
+<annotation>__Pseudonomisation of practitionner codes__</annotation>
+</comment>
+<foreach property='source.{PV1:AttendingDoctor()}' key='k1' >
+<assign value='source.{PV1:AttendingDoctor(k1).IDNumber}' property='codeAD' action='set' />
+<if condition='codeAD&apos;=""' >
+<true>
+<code>
+<![CDATA[ set pseudoAD=""
+ 
+ 
+  //if code practitionner already exist
+     
+          If $Get(^globalpseudo("codePractitioner",codeAD))'="" {
+               $$$LOGINFO("practitioner code already exists")
+               set pseudoAD=^globalpseudo("codePractitioner",codeAD)
+            }
+           else{
+               //Generating Salt
+               set salt=$SYSTEM.Encryption.GenCryptRand(4)
+               $$$LOGINFO("Salt = "_salt)
+               //Hashing code practitionner + salt
+               set dataSalt=codeAD_salt
+               set text=$SYSTEM.Encryption.SHAHash(256,dataSalt)
+               $$$LOGINFO("Hashed code = "_text)
+               set pseudoAD=$System.Encryption.Base64Encode(text)
+               set pseudoAD=$REPLACE($REPLACE(($REPLACE(pseudoAD,"=","2")),"/",""),"+","")
+               set ^globalpseudo("codePractitioner",codeAD)=pseudoAD
+               $$$LOGINFO("Code Practitionner after pseudonomization: "_pseudoAD) 
+       
+       }
+      ]]]]><![CDATA[></code>
+<assign value='codeAD' property='target.Encounters.(1).AttendingClinicians.(k1).Code' action='set' />
+</true>
+</if>
+</foreach>
+<foreach property='source.{PV1:ReferringDoctor()}' key='k2' >
+<assign value='source.{PV1:ReferringDoctor(k2).IDNumber}' property='codeRD' action='set' />
+<if condition='codeRD&apos;=""' >
+<true>
+<code>
+<![CDATA[ set pseudoRD=""
+ 
+ 
+  //if code practitionner already exist
+     
+          If $Get(^globalpseudo("codePractitioner",codeRD))'="" {
+               $$$LOGINFO("practitioner code already exists")
+               set pseudoRD=^globalpseudo("codePractitioner",codeRD)
+            }
+           else{
+               //Generating Salt
+               set salt=$SYSTEM.Encryption.GenCryptRand(4)
+               $$$LOGINFO("Salt = "_salt)
+               //Hashing code practitionner + salt
+               set dataSalt=codeRD_salt
+               set text=$SYSTEM.Encryption.SHAHash(256,dataSalt)
+               $$$LOGINFO("Hashed code = "_text)
+               set pseudoRD=$System.Encryption.Base64Encode(text)
+                set pseudoRD=$REPLACE($REPLACE(($REPLACE(pseudoRD,"=","2")),"/",""),"+","")
+               set ^globalpseudo("codePractitioner",codeRD)=pseudoRD
+               $$$LOGINFO("Code Practitionner after pseudonomization: "_pseudoRD) 
+       
+       }
+      ]]]]><![CDATA[></code>
+<assign value='codeRD' property='target.Encounters.(1).ReferringClinician.Code' action='set' />
+</true>
+</if>
+</foreach>
+<foreach property='source.{PV1:ConsultingDoctor()}' key='k3' >
+<assign value='source.{PV1:ConsultingDoctor(k3).IDNumber}' property='codeCD' action='set' />
+<if condition='codeCD&apos;=""' >
+<true>
+<code>
+<![CDATA[ set pseudoCD=""
+ 
+ //if code practitionner already exist
+     
+          If $Get(^globalpseudo("codePractitioner",codeCD))'="" {
+               $$$LOGINFO("practitioner code already exists")
+               set pseudoAD=^globalpseudo("codePractitioner",codeCD)
+            }
+           else{
+               //Generating Salt
+               set salt=$SYSTEM.Encryption.GenCryptRand(4)
+               $$$LOGINFO("Salt = "_salt)
+               //Hashing code practitionner + salt
+               set dataSalt=codeCD_salt
+               set text=$SYSTEM.Encryption.SHAHash(256,dataSalt)
+               $$$LOGINFO("Hashed code = "_text)
+               set pseudoCD=$System.Encryption.Base64Encode(text)
+               set pseudoCD=$REPLACE($REPLACE(($REPLACE(pseudoCD,"=","2")),"/",""),"+","")
+               set ^globalpseudo("codePractitioner",codeCD)=pseudoCD
+               $$$LOGINFO("Code Practitionner after pseudonomization: "_pseudoCD) 
+       
+       }]]]]><![CDATA[></code>
+<assign value='codeCD' property='target.Encounters.(1).ConsultingClinicians.(k3).Code' action='set' />
+</true>
+</if>
+</foreach>
+<comment>
+<annotation>__Pseudonomisation of Patient IPP__</annotation>
+</comment>
+<assign value='""' property='pseudoPt' action='set' />
+<assign value='""' property='OID' action='set' />
+<foreach property='source.{PID:PatientIdentifierList()}' key='P1' >
+<assign value='source.{PID:PatientIdentifierList(1).IDNumber}' property='MPIID' action='set' />
+<assign value='source.{PID:PatientIdentifierList(P1).AssigningAuthority.NamespaceID}' property='OID' action='set' />
+<code>
+<![CDATA[     
+     $$$LOGINFO("Patient IPP: "_MPIID)
+     set X=MPIID_"O"_OID
+     $$$LOGINFO("MPIID+OID = "_X)
+       //if ipp already exist
+     
+          If $Get(^globalpseudo("ippPatient",MPIID,OID))'="" {
+               $$$LOGINFO("ipp alrealdy exist !")
+               set pseudoPt=^globalpseudo("ippPatient",MPIID,OID)
+            }
+           else{
+           
+           //Generating Salt
+           set salt=$SYSTEM.Encryption.GenCryptRand(4)
+           $$$LOGINFO("Salt = "_salt)
+          //Hashing IPP+salt
+          set dataSalt=X_salt
+          set text=$SYSTEM.Encryption.SHAHash(256,dataSalt)
+          $$$LOGINFO("Hashed IPP = "_text)
+          Set pseudoPt=$SYSTEM.Encryption.Base64Encode(text)
+          set pseudoPt=$REPLACE($REPLACE(($REPLACE(pseudoPt,"=","2")),"/",""),"+","")
+          set ^globalpseudo("ippPatient",MPIID,OID)=pseudoPt
+          set ^globalpseudoAPI("ippPatient",MPIID)=pseudoPt
+          $$$LOGINFO("ipp patient after pseudonomization : "_pseudoPt) 
+       
+           
+           }
+
+       ]]]]><![CDATA[></code>
+<assign value='MPIID' property='target.Patient.MPIID' action='set' />
+<if condition='source.{PID:PatientIdentifierList(P1).IdentifierTypeCode}="PI"' disabled='1' >
+<true/>
+<false/>
+</if>
+</foreach>
+<assign value='MPIID' property='target.Patient.PatientNumbers.(2).Number' action='set' />
+<foreach property='target.Patient.PatientNumbers()' key='J1' >
+<if condition='target.Patient.PatientNumbers.(J1).NumberType="MRN"' >
+<true>
+<assign value='MPIID' property='target.Patient.PatientNumbers.(1).Number' action='set' />
+</true>
+</if>
+</foreach>
+<assign value='""' property='NDA' action='set' />
+<assign value='source.{PV1:VisitNumber.IDNumber}' property='NDA' action='set' />
+<if condition='source.{MSH:MessageType.TriggerEvent}="A04"' disabled='1' >
+<true>
+<assign value='source.{PV1:PreadmitNumber.IDNumber}' property='NDA' action='set' />
+</true>
+<false>
+<assign value='source.{PV1:VisitNumber.IDNumber}' property='NDA' action='set' />
+</false>
+</if>
+<if condition='NDA&apos;=""' >
+<true>
+<code>
+<![CDATA[ set pseudoNDA=""
+     $$$LOGINFO("NDA asma: "_NDA)
+     set Y=NDA_"O"_OID
+     $$$LOGINFO("y: "_Y)
+     
+     
+     //if numéro de séjour already exist
+     
+          If $Get(^globalpseudo("idEncounter",NDA,OID))'="" {
+               $$$LOGINFO("NDA already exists")
+               set pseudoNDA=^globalpseudo("idEncounter",NDA,OID)
+            }
+           else{
+               //Generating Salt
+               set salt=$SYSTEM.Encryption.GenCryptRand(4)
+               $$$LOGINFO("Salt = "_salt)
+               //Hashing code practitionner + salt
+               set dataSalt=Y_salt
+               set text=$SYSTEM.Encryption.SHAHash(256,dataSalt)
+               $$$LOGINFO("Hashed code = "_text)
+               set pseudoNDA=$System.Encryption.Base64Encode(text)
+               set pseudoNDA=$REPLACE($REPLACE(($REPLACE(pseudoNDA,"=","2")),"/",""),"+","")
+               set ^globalpseudo("idEncounter",NDA,OID)=pseudoNDA
+               set ^globalpseudoAPI("idEncounter",NDA)=pseudoNDA
+               $$$LOGINFO("numéro séjour du patient after pseudonomization : "_pseudoNDA) 
+
+       
+       }
+      
+     
+      ]]]]><![CDATA[></code>
+<assign value='NDA' property='target.Encounters.(1).EncounterNumber' action='set' />
+</true>
+</if>
+<foreach property='source.{NK1()}' key='k1' >
+<foreach property='source.{NK1(k1):Name()}' key='k2' >
+<assign value='source.{NK1(k1):Name(k2).FamilyName}' property='target.Patient.SupportContacts.(k2).Name.FamilyName' action='set' />
+<assign value='source.{NK1(k1):Name(k2).GivenName}' property='target.Patient.SupportContacts.(k2).Name.GivenName' action='set' />
+<assign value='source.{NK1(k1):Name(k2).Prefix}' property='target.Patient.SupportContacts.(k1).Name.FamilyNamePrefix' action='set' />
+<assign value='source.{NK1(k1):Name(k2).Suffix}' property='target.Patient.SupportContacts.(k1).Name.NamePrefix' action='set' />
+<assign value='source.{NK1(k1):Name(k2).NameTypeCode}' property='target.Patient.SupportContacts.(k1).Name.Type' action='set' />
+</foreach>
+<assign value='source.{NK1(k1):Relationship.Identifier}' property='target.Patient.SupportContacts.(k1).Relationship.EId' action='set' />
+<assign value='source.{NK1(k1):Relationship.Text}' property='target.Patient.SupportContacts.(k1).Relationship.OriginalText' action='set' />
+<foreach property='source.{NK1(k1):PhoneNumber()}' key='k2' >
+<assign value='source.{NK1(k1):PhoneNumber(k2).EmailAddress}' property='target.Patient.SupportContacts.(k1).ContactInfo.EmailAddress' action='set' />
+<assign value='source.{NK1(k1):PhoneNumber(k2).TelephoneNumber}' property='target.Patient.SupportContacts.(k1).ContactInfo.MobilePhoneNumber' action='set' />
+</foreach>
+<assign value='source.{NK1(k1):AdministrativeSex}' property='target.Patient.SupportContacts.(k1).Gender' action='set' />
+<assign value='source.{NK1(k1):DateTimeofBirth.Time}' property='target.Patient.SupportContacts.(k1).BirthTime' action='set' />
+<assign value='source.{NK1(k1):PrimaryLanguage}' property='target.Patient.SupportContacts.(k1).PrimaryLanguage' action='set' />
+<assign value='source.{NK1(k1):ContactRole.Text}' property='target.Patient.SupportContacts.(k1).ContactType.Description' action='set' />
+</foreach>
+<foreach property='source.{ROL()}' key='k2' >
+<assign value='source.{ROL(k2):RolePerson(1).IdentifierTypeCode}' property='target.Encounters.(k2).AdmittingClinician.IdentifierTypeCode' action='set' />
+<assign value='source.{ROL(k2):RolePerson(1).IDNumber}' property='target.Encounters.(k2).AdmittingClinician.Code' action='set' />
+<assign value='source.{ROL(k2):RolePerson(1).FamilyName}' property='target.Encounters.(k2).AdmittingClinician.Name.FamilyName' action='set' />
+<assign value='source.{ROL(k2):RolePerson(1).GivenName}' property='target.Encounters.(k2).AdmittingClinician.Name.GivenName' action='set' />
+<assign value='source.{ROL(k2):RolePerson(1).Prefix}' property='target.Encounters.(k2).AdmittingClinician.Name.NamePrefix' action='set' />
+<assign value='source.{ROL(k2):RolePerson(1).Suffix}' property='target.Encounters.(k2).AdmittingClinician.Name.NameSuffix' action='set' />
+<assign value='source.{ROL(k2):OfficeHomeAddressBirthplace(1).StreetAddress}' property='target.Encounters.(k2).AdmittingClinician.Address.Street' action='set' />
+<assign value='source.{ROL(k2):OfficeHomeAddressBirthplace(1).City}' property='target.Encounters.(k2).AdmittingClinician.Address.City' action='set' />
+<assign value='source.{ROL(k2):OfficeHomeAddressBirthplace(1).StateorProvince}' property='target.Encounters.(k2).AdmittingClinician.Address.State' action='set' />
+<assign value='source.{ROL(k2):OfficeHomeAddressBirthplace(1).ZiporPostalCode}' property='target.Encounters.(k2).AdmittingClinician.Address.Zip' action='set' />
+<assign value='source.{ROL(k2):OfficeHomeAddressBirthplace(1).Country}' property='target.Encounters.(k2).AdmittingClinician.Address.Country' action='set' />
+<assign value='source.{ROL(k2):Phone(1).TelephoneNumber}' property='target.Encounters.(k2).AdmittingClinician.ContactInfo.HomePhoneNumber' action='set' />
+<assign value='source.{ROL(k2):Phone(1).EmailAddress}' property='target.Encounters.(k2).AdmittingClinician.ContactInfo.EmailAddress' action='set' />
+</foreach>
+</transform>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="DTLtest.HL7FHIRV2">
+<Description>
+</Description>
+<Super>Ens.BusinessProcessBPL</Super>
+<TimeChanged>67030,51106.665403884</TimeChanged>
+<TimeCreated>66542,59478.058810576</TimeCreated>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+</Storage>
+
+<XData name="BPL">
+<Description>
+BPL Definition</Description>
+<XMLNamespace>http://www.intersystems.com/bpl</XMLNamespace>
+<Data><![CDATA[
+<process language='objectscript' request='EnsLib.HL7.Message' response='Ens.Response' height='2000' width='2000' >
+<context>
+<property name='TStream' type='Ens.StreamContainer' instantiate='0' />
+<property name='test' type='EnsLib.HL7.Message' instantiate='0' />
+<property name='xxl2' type='EnsLib.HL7.Message' instantiate='0' />
+<property name='BStream' type='HS.Message.XMLMessage' instantiate='0' />
+<property name='TStreamPractionner' type='Ens.StreamContainer' instantiate='0' />
+<property name='TStreamTot' type='Ens.StreamContainer' instantiate='0' />
+</context>
+<sequence xend='200' yend='550' >
+<transform name='transformation tot' class='testforamtionpourpedro.transformationMFNtoSDA' source='request' target='context.TStreamTot' xpos='200' ypos='250' />
+<code xpos='200' ypos='350' >
+<![CDATA[  set tSDA3Object = context.TStreamTot
+     Set tQuickStream = ##class(HS.SDA3.QuickStream).%New()
+
+    $$$ThrowOnError(tSDA3Object.XMLExportToStream(.tQuickStream))
+     $$$LOGINFO("wafik dcbjkfcjf")
+
+    $$$LOGINFO("tQuickStream wafik 123455 :  "_tQuickStream.Read())
+
+
+       set pResponsewafik = ##class(HS.Message.XMLMessage).%New()
+       Do pResponsewafik.AdditionalInfo.SetAt(tQuickStream.%Id(),"QuickStreamId")
+           Do pResponsewafik.AdditionalInfo.SetAt(tSDA3Object.Patient.MPIID,"PatientResourceId")
+           
+           //Do pResponsewafik.AdditionalInfo.SetAt("1236545555","EncounterNumber")
+           
+        //wafik ajout
+         set context.xxl2 = ##class(EnsLib.EDI.XML.Document).%New(tQuickStream)
+
+         //set tSC = ..SendRequestSync("RoutingEnginetest1",xxl2)
+
+    //type 2
+
+    set xx = ##class(Ens.StreamContainer).%New()
+    set xx.Stream = tQuickStream.Read()
+    //set xx.Type = "FC"]]]]><![CDATA[>
+</code>
+<call name='SDA_FHIR' target='HS.FHIR.DTL.Util.HC.SDA3.FHIR.ProcessPractionner' async='1' xpos='200' ypos='450' >
+<request type='Ens.StreamContainer' >
+<assign property="callrequest" value="pResponsewafik" action="set" />
+</request>
+<response type='Ens.Response' />
+</call>
+</sequence>
+</process>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="DTLtest.HL7toFHIR">
+<Description>
+</Description>
+<Super>Ens.BusinessProcessBPL</Super>
+<TimeChanged>67061,52682.828613537</TimeChanged>
+<TimeCreated>67061,52595.730122376</TimeCreated>
+
+<XData name="BPL">
+<Description>
+BPL Definition</Description>
+<XMLNamespace>http://www.intersystems.com/bpl</XMLNamespace>
+<Data><![CDATA[
+<process language='objectscript' request='EnsLib.HL7.Message' response='Ens.Response' height='2000' width='2000' >
+<context>
+<property name='TStream' type='Ens.StreamContainer' instantiate='0' />
+<property name='test' type='EnsLib.HL7.Message' instantiate='0' />
+<property name='xxl2' type='EnsLib.HL7.Message' instantiate='0' />
+<property name='BStream' type='HS.Message.XMLMessage' instantiate='0' />
+<property name='TStreamPractionner' type='Ens.StreamContainer' instantiate='0' />
+<property name='TStreamTot' type='Ens.StreamContainer' instantiate='0' />
+</context>
+<sequence xend='200' yend='550' >
+<transform name='transformation tot' class='DTLtest.HL7FHIR.hl7tofhirV2' source='request' target='context.TStreamTot' xpos='200' ypos='250' />
+<code xpos='200' ypos='350' >
+<![CDATA[  set tSDA3Object = context.TStreamTot
+     Set tQuickStream = ##class(HS.SDA3.QuickStream).%New()
+
+    $$$ThrowOnError(tSDA3Object.XMLExportToStream(.tQuickStream))
+     $$$LOGINFO("wafik dcbjkfcjf")
+
+    $$$LOGINFO("tQuickStream wafik 123455 :  "_tQuickStream.Read())
+
+
+       set pResponsewafik = ##class(HS.Message.XMLMessage).%New()
+       Do pResponsewafik.AdditionalInfo.SetAt(tQuickStream.%Id(),"QuickStreamId")
+           Do pResponsewafik.AdditionalInfo.SetAt(tSDA3Object.Patient.MPIID,"PatientResourceId")
+           
+           //Do pResponsewafik.AdditionalInfo.SetAt("1236545555","EncounterNumber")
+           
+        //wafik ajout
+         set context.xxl2 = ##class(EnsLib.EDI.XML.Document).%New(tQuickStream)
+
+         //set tSC = ..SendRequestSync("RoutingEnginetest1",xxl2)
+
+    //type 2
+
+    set xx = ##class(Ens.StreamContainer).%New()
+    set xx.Stream = tQuickStream.Read()
+    //set xx.Type = "FC"]]]]><![CDATA[>
+</code>
+<call name='SDA_FHIR' target='HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process' async='1' xpos='200' ypos='450' >
+<request type='Ens.StreamContainer' >
+<assign property="callrequest" value="pResponsewafik" action="set" languageOverride="" />
+</request>
+<response type='Ens.Response' />
+</call>
+</sequence>
+</process>
+]]></Data>
+</XData>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+</Storage>
+</Class>
+
+
+<Project name="EnsExportProduction_2024-08-09 14-41-04_050+0" LastModified="2024-08-09 14:43:33.889372032">
+  <ProjectDescription>Studio Project generated from Production 'LNATESTPKG.FoundationProduction' at 2024-08-09 14:41:04.050 UTC</ProjectDescription>
+  <Items>
+    <ProjectItem name="DTLAppointment.SIUtoFHIR" type="CLS"></ProjectItem>
+    <ProjectItem name="DTLtest.HL7FHIR.SIUtofhirV2" type="CLS"></ProjectItem>
+    <ProjectItem name="DTLtest.HL7FHIR.hl7tofhirV2" type="CLS"></ProjectItem>
+    <ProjectItem name="DTLtest.HL7FHIRV2" type="CLS"></ProjectItem>
+    <ProjectItem name="DTLtest.HL7toFHIR" type="CLS"></ProjectItem>
+    <ProjectItem name="User.HL7toFHIR" type="CLS"></ProjectItem>
+    <ProjectItem name="User.JsontoHTTP" type="CLS"></ProjectItem>
+    <ProjectItem name="User.JsontoHTTP2" type="CLS"></ProjectItem>
+    <ProjectItem name="User.JsontoHTTPPractionner" type="CLS"></ProjectItem>
+    <ProjectItem name="testforamtionpourpedro.transformationMFNtoSDA" type="CLS"></ProjectItem>
+    <ProjectItem name="Settings:DTLAppointment.SIUtoFHIR.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:DTLPraticien.MFNtoFHIR.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:DTLtest.HL7toFHIR.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process2.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:HS.FHIR.DTL.Util.HC.SDA3.FHIR.ProcessPractionner.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:HS.FHIRServer.Interop.Operation.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:HS.Util.Trace.Operations.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:InputADT.Patient.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:InputMFN.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:InputSIU.appointment.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:User.HL7toFHIR.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:User.JsontoHTTP.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:User.JsontoHTTP2.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:User.JsontoHTTPPractionner.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="EnsExportNotes.EnsExportProduction_2024-08-09 14-41-04_050+0.PTD" type="PTD"></ProjectItem>
+  </Items>
+</Project>
+
+
+
+
+
+
+
+
+
+<Class name="User.HL7toFHIR">
+<ClassType>persistent</ClassType>
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>66920,32673.836587915</TimeChanged>
+<TimeCreated>66920,32673.836587915</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Default><![CDATA[TargetConfigName:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId},TransformFile:Basic]]></Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>Ens.DataType.ConfigName</Type>
+<InitialExpression>"HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process"</InitialExpression>
+</Property>
+
+<Method name="OnRequest">
+<Description>
+Transforms an HL7 message to SDA, an internal healthcare format for InterSystems IRIS for Health.</Description>
+<FormalSpec>pRequest:EnsLib.HL7.Message,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set tSC = $$$OK
+	try {
+         set tSC = ##class(HS.Gateway.HL7.HL7ToSDA3).GetSDA(pRequest,.tSDA)
+         set tSC = ..SendRequestSync(..TargetConfigName,##class(Ens.StreamContainer).%New(tSDA),.pResponse)
+	} catch ex {
+		set tSC = ex.AsStatus()
+	}
+	
+	quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>HT7toFHIRDefaultData</DefaultData>
+<Data name="HT7toFHIRDefaultData">
+<Subscript>"HT7toFHIR"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="User.JsontoHTTP">
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>66949,48307.28593839</TimeChanged>
+<TimeCreated>66920,36414.286250386</TimeCreated>
+
+<Property name="ServerName">
+<Type>%String</Type>
+</Property>
+
+<Property name="Port">
+<Type>%String</Type>
+</Property>
+
+<Property name="SSLConfiguration">
+<Type>%String</Type>
+</Property>
+
+<Property name="ContentType">
+<Type>%String</Type>
+</Property>
+
+<Property name="Https">
+<Type>%String</Type>
+</Property>
+
+<Property name="ContentCharset">
+<Type>%String</Type>
+</Property>
+
+<Parameter name="SETTINGS">
+<Default>ServerName,Port,SSLConfiguration,ContentType,Https,ContentCharset</Default>
+</Parameter>
+
+<Method name="OnRequest">
+<FormalSpec>pFhirRequest:HS.FHIRServer.Interop.Request,*pFhirResponse:Ens.StreamContainer</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+
+    $$$LOGINFO("wafik 1111111")
+      Set tSC = $$$OK
+      Try {
+
+        set stream = ##class(HS.SDA3.QuickStream).%OpenId(pFhirRequest.QuickStreamId)  
+      
+        set payload = ##class(%DynamicObject).%FromJSON(stream)
+    
+         $$$LOGINFO("json :  " _payload.%ToJSON())
+        set xx = payload.%ToJSON()
+
+
+
+
+
+
+
+
+
+          set cc = xx
+        set dynEntity = {}.%FromJSON(cc)
+       set itr = dynEntity.%GetIterator()
+        while itr.%GetNext(.key,.val) 
+        {
+             $$$LOGINFO("key :  " _key_"val : "_val)
+           set aa = val
+              $$$LOGINFO("valeur wafik mta3 if :  " _val)
+
+   //if seulon le type de la resource
+              IF (val = "Patient")
+              {
+
+                    set httprequest = ##class(%Net.HttpRequest).%New()
+                  set HttpResponse = ##class(%Net.HttpResponse).%New()
+                  $$$LOGINFO("Setting the server port... ")
+                //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+                  $$$LOGINFO("Setting the content-type... ") 
+                  //d httprequest.SetParam("username","lnauser")
+                  //d httprequest.SetParam("password","Sa@P4gxa5b?NcD9x")
+                  //Set httprequest.Authorization=("Basic bG5hdXNlcjpTYUBQNGd4YTViP05jRDl4")  
+                  //set httprequest.SSLConfiguration ="testwafik"  
+                  //Set httprequest.Https = 1
+
+                    Set httprequest.ContentType=("application/json")
+                    Set httprequest.ContentCharset="UTF-8"
+                    //d httprequest.EntityBody.Write(patient.%ToJSON())
+                    d httprequest.EntityBody.Write(xx)
+                    set httprequest.Server ="217.75.174.12"
+					set httprequest.Port=8080
+                    set status = httprequest.Post("/fhir/Patient")
+                          $$$LOGINFO("Data retrieved :"_status)
+                      D httprequest.HttpResponse.OutputToDevice() 
+                        $$$LOGINFO("test      "_status)
+
+                                  //$$$LOGINFO("resultat :"_Result.%ToJSON())
+                       $$$LOGINFO("test      "_httprequest.HttpResponse)
+                         $$$LOGINFO("test      "_httprequest.HttpResponse.Data.Read())
+                        $$$LOGINFO("test      "_httprequest.HttpResponse.StatusCode)
+                          $$$LOGINFO("test    wafik  ")
+              }
+
+                  IF (val = "Practitioner")
+              {
+
+                    set httprequest = ##class(%Net.HttpRequest).%New()
+                  set HttpResponse = ##class(%Net.HttpResponse).%New()
+                  $$$LOGINFO("Setting the server port... ")
+                //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+                  $$$LOGINFO("Setting the content-type... ") 
+                  //d httprequest.SetParam("username","lnauser")
+                  //d httprequest.SetParam("password","Sa@P4gxa5b?NcD9x")
+                  //Set httprequest.Authorization=("Basic bG5hdXNlcjpTYUBQNGd4YTViP05jRDl4")  
+                  //set httprequest.SSLConfiguration ="testwafik"  
+                  //Set httprequest.Https = 1
+
+                    Set httprequest.ContentType=("application/json")
+                    Set httprequest.ContentCharset="UTF-8"
+                    //d httprequest.EntityBody.Write(patient.%ToJSON())
+                    d httprequest.EntityBody.Write(xx)
+                    set httprequest.Server ="217.75.174.12"
+					set httprequest.Port=8080
+                    set status = httprequest.Post("/fhir/Practitioner")
+                          $$$LOGINFO("Data retrieved :"_status)
+                      D httprequest.HttpResponse.OutputToDevice() 
+                        $$$LOGINFO("test      "_status)
+
+                                  //$$$LOGINFO("resultat :"_Result.%ToJSON())
+                       $$$LOGINFO("test      "_httprequest.HttpResponse)
+                         $$$LOGINFO("test      "_httprequest.HttpResponse.Data.Read())
+                        $$$LOGINFO("test      "_httprequest.HttpResponse.StatusCode)
+                          $$$LOGINFO("test    wafik  ")
+              }
+              
+                  IF (val = "Encounter")
+              {
+
+                    set httprequest = ##class(%Net.HttpRequest).%New()
+                  set HttpResponse = ##class(%Net.HttpResponse).%New()
+                  $$$LOGINFO("Setting the server port... ")
+                //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+                  $$$LOGINFO("Setting the content-type... ") 
+                  //d httprequest.SetParam("username","lnauser")
+                  //d httprequest.SetParam("password","Sa@P4gxa5b?NcD9x")
+                  //Set httprequest.Authorization=("Basic bG5hdXNlcjpTYUBQNGd4YTViP05jRDl4")  
+                  //set httprequest.SSLConfiguration ="testwafik"  
+                  //Set httprequest.Https = 1
+
+                    Set httprequest.ContentType=("application/json")
+                    Set httprequest.ContentCharset="UTF-8"
+                    //d httprequest.EntityBody.Write(patient.%ToJSON())
+                    d httprequest.EntityBody.Write(xx)
+                    set httprequest.Server ="217.75.174.12"
+					set httprequest.Port=8080
+                    set status = httprequest.Post("/fhir/Encounter")
+                          $$$LOGINFO("Data retrieved :"_status)
+                      D httprequest.HttpResponse.OutputToDevice() 
+                        $$$LOGINFO("test      "_status)
+
+                                  //$$$LOGINFO("resultat :"_Result.%ToJSON())
+                       $$$LOGINFO("test      "_httprequest.HttpResponse)
+                         $$$LOGINFO("test      "_httprequest.HttpResponse.Data.Read())
+                        $$$LOGINFO("test      "_httprequest.HttpResponse.StatusCode)
+                          $$$LOGINFO("test    wafik  ")
+              }
+
+
+    
+                  IF (val = "Appointment")
+              {
+
+                    set httprequest = ##class(%Net.HttpRequest).%New()
+                  set HttpResponse = ##class(%Net.HttpResponse).%New()
+                  $$$LOGINFO("Setting the server port... ")
+                //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+                  $$$LOGINFO("Setting the content-type... ") 
+                  //d httprequest.SetParam("username","lnauser")
+                  //d httprequest.SetParam("password","Sa@P4gxa5b?NcD9x")
+                  //Set httprequest.Authorization=("Basic bG5hdXNlcjpTYUBQNGd4YTViP05jRDl4")  
+                  //set httprequest.SSLConfiguration ="testwafik"  
+                  //Set httprequest.Https = 1
+
+                    Set httprequest.ContentType=("application/json")
+                    Set httprequest.ContentCharset="UTF-8"
+                    //d httprequest.EntityBody.Write(patient.%ToJSON())
+                    d httprequest.EntityBody.Write(xx)
+                    set httprequest.Server ="217.75.174.12"
+					set httprequest.Port=8080
+                    set status = httprequest.Post("/fhir/Appointment")
+                          $$$LOGINFO("Data retrieved :"_status)
+                      D httprequest.HttpResponse.OutputToDevice() 
+                        $$$LOGINFO("test      "_status)
+
+                                  //$$$LOGINFO("resultat :"_Result.%ToJSON())
+                       $$$LOGINFO("test      "_httprequest.HttpResponse)
+                         $$$LOGINFO("test      "_httprequest.HttpResponse.Data.Read())
+                        $$$LOGINFO("test      "_httprequest.HttpResponse.StatusCode)
+                          $$$LOGINFO("test    wafik  ")
+              }
+
+
+
+
+                  IF (val = "Organization")
+              {
+
+                    set httprequest = ##class(%Net.HttpRequest).%New()
+                  set HttpResponse = ##class(%Net.HttpResponse).%New()
+                  $$$LOGINFO("Setting the server port... ")
+                //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+                  $$$LOGINFO("Setting the content-type... ") 
+                  //d httprequest.SetParam("username","lnauser")
+                  //d httprequest.SetParam("password","Sa@P4gxa5b?NcD9x")
+                  //Set httprequest.Authorization=("Basic bG5hdXNlcjpTYUBQNGd4YTViP05jRDl4")  
+                  //set httprequest.SSLConfiguration ="testwafik"  
+                  //Set httprequest.Https = 1
+
+                    Set httprequest.ContentType=("application/json")
+                    Set httprequest.ContentCharset="UTF-8"
+                    //d httprequest.EntityBody.Write(patient.%ToJSON())
+                    d httprequest.EntityBody.Write(xx)
+                    set httprequest.Server ="217.75.174.12"
+					set httprequest.Port=8080
+                    set status = httprequest.Post("/fhir/Organization")
+                          $$$LOGINFO("Data retrieved :"_status)
+                      D httprequest.HttpResponse.OutputToDevice() 
+                        $$$LOGINFO("test      "_status)
+
+                                  //$$$LOGINFO("resultat :"_Result.%ToJSON())
+                       $$$LOGINFO("test      "_httprequest.HttpResponse)
+                         $$$LOGINFO("test      "_httprequest.HttpResponse.Data.Read())
+                        $$$LOGINFO("test      "_httprequest.HttpResponse.StatusCode)
+                          $$$LOGINFO("test    wafik  ")
+              }
+
+
+             IF (val = "Location")
+              {
+
+                    set httprequest = ##class(%Net.HttpRequest).%New()
+                  set HttpResponse = ##class(%Net.HttpResponse).%New()
+                  $$$LOGINFO("Setting the server port... ")
+                //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+                  $$$LOGINFO("Setting the content-type... ") 
+                  //d httprequest.SetParam("username","lnauser")
+                  //d httprequest.SetParam("password","Sa@P4gxa5b?NcD9x")
+                  //Set httprequest.Authorization=("Basic bG5hdXNlcjpTYUBQNGd4YTViP05jRDl4")  
+                  //set httprequest.SSLConfiguration ="testwafik"  
+                  //Set httprequest.Https = 1
+
+                    Set httprequest.ContentType=("application/json")
+                    Set httprequest.ContentCharset="UTF-8"
+                    //d httprequest.EntityBody.Write(patient.%ToJSON())
+                    d httprequest.EntityBody.Write(xx)
+                    set httprequest.Server ="217.75.174.12"
+					set httprequest.Port=8080
+                    set status = httprequest.Post("/fhir/Location")
+                          $$$LOGINFO("Data retrieved :"_status)
+                      D httprequest.HttpResponse.OutputToDevice() 
+                        $$$LOGINFO("test      "_status)
+
+                                  //$$$LOGINFO("resultat :"_Result.%ToJSON())
+                       $$$LOGINFO("test      "_httprequest.HttpResponse)
+                         $$$LOGINFO("test      "_httprequest.HttpResponse.Data.Read())
+                        $$$LOGINFO("test      "_httprequest.HttpResponse.StatusCode)
+                          $$$LOGINFO("test    wafik  ")
+              }
+
+
+
+
+
+
+
+
+ 
+           }
+
+
+          /*set xx={}.%FromJSON(stream)
+            set entry = xx.entry
+             $$$LOGINFO("entry :  " _entry.%ToJSON())
+
+
+        set cc = entry.%ToJSON()
+        set dynEntity = {}.%FromJSON(cc)
+       set itr = dynEntity.%GetIterator()
+        while itr.%GetNext(.key,.val) 
+        {
+             $$$LOGINFO("key :  " _key_"val : "_val)
+           set aa = val
+        }
+             $$$LOGINFO("entry :  " _aa.%ToJSON())
+
+
+             set dd = aa.%ToJSON()
+        set dynEntityd = {}.%FromJSON(dd)
+       set itr = dynEntityd.%GetIterator()
+        while itr.%GetNext(.key,.val) 
+        {
+             $$$LOGINFO("key :  " _key_"val : "_val)
+             set patient = val
+         
+        }
+
+      $$$LOGINFO("patient :  "_patient.%ToJSON())*/
+       
+
+
+
+        // set resource = json.resourceType
+        // $$$LOGINFO("jsonpatient :  " _resource.%ToJSON())
+
+
+            
+       /*********** Extract JSON message *************/
+              
+      /* set str=pFhirRequest.Payload 
+       $$$LOGINFO("JSON Message! Etape 1 : "_str)
+       
+       set text = ""
+       do str.Rewind()
+       while 'str.AtEnd {
+       set text = str.Read()
+       }     
+     $$$LOGINFO("JSON Message! Etape 2 : "_text)*/
+     
+     
+
+
+     /*********** Create a HTTP POST Request  *************/
+     /* d httprequest.EntityBody.Write(text)
+      set httprequest.ContentType  = ("application/json;charset=UTF-8")
+      set status = httprequest.Post("/fhirhl7v2demo/fhir/r4/")
+        $$$LOGINFO("Geting response from FHIR server... ")
+        Set Result = [].%FromJSON(httprequest.HttpResponse.Data)
+        $$$LOGINFO("Data retrieved :"_Result.%ToJSON()) **/
+      /*if $$$ISERR(status) {
+            //do $system.OBJ.DisplayError()     
+            $$$LOGINFO(" Bundle non crée !!! ")
+            
+      } else {
+            set response=httprequest.HttpResponse
+            
+            $$$LOGINFO(" Bundle crée ! ")
+            
+            $$$LOGINFO("Response is : " _httprequest.HttpResponse.Data)
+      }**/
+       //Quit:$$$ISERR(status)
+      
+       } 
+       Catch eException {
+        set tSC = eException.AsStatus()   
+       }
+            
+      Quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>JsonProcessDefaultData</DefaultData>
+<Data name="JsonProcessDefaultData">
+<Subscript>"JsonProcess"</Subscript>
+<Value name="1">
+<Value>ServerName</Value>
+</Value>
+<Value name="2">
+<Value>Port</Value>
+</Value>
+<Value name="3">
+<Value>SSLConfiguration</Value>
+</Value>
+<Value name="4">
+<Value>ContentType</Value>
+</Value>
+<Value name="5">
+<Value>Https</Value>
+</Value>
+<Value name="6">
+<Value>ContentCharset</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="User.JsontoHTTP2">
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>66963,48492.164160476</TimeChanged>
+<TimeCreated>66963,48404.062620055</TimeCreated>
+
+<Property name="ServerName">
+<Type>%String</Type>
+</Property>
+
+<Property name="Port">
+<Type>%String</Type>
+</Property>
+
+<Property name="SSLConfiguration">
+<Type>%String</Type>
+</Property>
+
+<Property name="ContentType">
+<Type>%String</Type>
+</Property>
+
+<Property name="Https">
+<Type>%String</Type>
+</Property>
+
+<Property name="ContentCharset">
+<Type>%String</Type>
+</Property>
+
+<Parameter name="SETTINGS">
+<Default>ServerName,Port,SSLConfiguration,ContentType,Https,ContentCharset</Default>
+</Parameter>
+
+<Method name="OnRequest">
+<FormalSpec>pFhirRequest:HS.FHIRServer.Interop.Request,*pFhirResponse:Ens.StreamContainer</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+
+    $$$LOGINFO("wafik 1111111")
+      Set tSC = $$$OK
+      Try {
+
+        set stream = ##class(HS.SDA3.QuickStream).%OpenId(pFhirRequest.QuickStreamId)  
+      
+        set payload = ##class(%DynamicObject).%FromJSON(stream)
+    
+         $$$LOGINFO("json :  " _payload.%ToJSON())
+        set xx = payload.%ToJSON()
+
+
+
+
+
+
+
+
+
+          set cc = xx
+        set dynEntity = {}.%FromJSON(cc)
+       set itr = dynEntity.%GetIterator()
+        while itr.%GetNext(.key,.val) 
+        {
+             $$$LOGINFO("key :  " _key_"val : "_val)
+           set aa = val
+              $$$LOGINFO("valeur wafik mta3 if :  " _val)
+
+   //if seulon le type de la resource
+              IF (val = "Patient")
+              {
+
+                    set httprequest = ##class(%Net.HttpRequest).%New()
+                  set HttpResponse = ##class(%Net.HttpResponse).%New()
+                  $$$LOGINFO("Setting the server port... ")
+                //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+                  $$$LOGINFO("Setting the content-type... ") 
+                  //d httprequest.SetParam("username","lnauser")
+                  //d httprequest.SetParam("password","Sa@P4gxa5b?NcD9x")
+                  Set httprequest.Authorization=("Basic Zm9ydXNlcjpqSGJmYW9qdGdRJGU5eWFA")  
+                  //set httprequest.SSLConfiguration ="testwafik"  
+                  //Set httprequest.Https = 1
+
+                    Set httprequest.ContentType=("application/json")
+                    Set httprequest.ContentCharset="UTF-8"
+                    //d httprequest.EntityBody.Write(patient.%ToJSON())
+                    d httprequest.EntityBody.Write(xx)
+                    set httprequest.Server ="fhir-test.for.ftprod.fr"
+                    set status = httprequest.Post("/fhir/Patient")
+                          $$$LOGINFO("Data retrieved :"_status)
+                      D httprequest.HttpResponse.OutputToDevice() 
+                        $$$LOGINFO("test      "_status)
+
+                                  //$$$LOGINFO("resultat :"_Result.%ToJSON())
+                       $$$LOGINFO("test      "_httprequest.HttpResponse)
+                         $$$LOGINFO("test      "_httprequest.HttpResponse.Data.Read())
+                        $$$LOGINFO("test      "_httprequest.HttpResponse.StatusCode)
+                          $$$LOGINFO("test    wafik  ")
+              }
+
+                  IF (val = "Practitioner")
+              {
+
+                    set httprequest = ##class(%Net.HttpRequest).%New()
+                  set HttpResponse = ##class(%Net.HttpResponse).%New()
+                  $$$LOGINFO("Setting the server port... ")
+                //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+                  $$$LOGINFO("Setting the content-type... ") 
+                  //d httprequest.SetParam("username","lnauser")
+                  //d httprequest.SetParam("password","Sa@P4gxa5b?NcD9x")
+                  Set httprequest.Authorization=("Basic Zm9ydXNlcjpqSGJmYW9qdGdRJGU5eWFA")  
+                  //set httprequest.SSLConfiguration ="testwafik"  
+                  //Set httprequest.Https = 1
+
+                    Set httprequest.ContentType=("application/json")
+                    Set httprequest.ContentCharset="UTF-8"
+                    //d httprequest.EntityBody.Write(patient.%ToJSON())
+                    d httprequest.EntityBody.Write(xx)
+                    set httprequest.Server ="fhir-test.for.ftprod.fr"
+                    set status = httprequest.Post("/fhir/Practitioner")
+                          $$$LOGINFO("Data retrieved :"_status)
+                      D httprequest.HttpResponse.OutputToDevice() 
+                        $$$LOGINFO("test      "_status)
+
+                                  //$$$LOGINFO("resultat :"_Result.%ToJSON())
+                       $$$LOGINFO("test      "_httprequest.HttpResponse)
+                         $$$LOGINFO("test      "_httprequest.HttpResponse.Data.Read())
+                        $$$LOGINFO("test      "_httprequest.HttpResponse.StatusCode)
+                          $$$LOGINFO("test    wafik  ")
+              }
+              
+                  IF (val = "Encounter")
+              {
+
+                    set httprequest = ##class(%Net.HttpRequest).%New()
+                  set HttpResponse = ##class(%Net.HttpResponse).%New()
+                  $$$LOGINFO("Setting the server port... ")
+                //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+                  $$$LOGINFO("Setting the content-type... ") 
+                  //d httprequest.SetParam("username","lnauser")
+                  //d httprequest.SetParam("password","Sa@P4gxa5b?NcD9x")
+                  Set httprequest.Authorization=("Basic Zm9ydXNlcjpqSGJmYW9qdGdRJGU5eWFA")  
+                  //set httprequest.SSLConfiguration ="testwafik"  
+                  //Set httprequest.Https = 1
+
+                    Set httprequest.ContentType=("application/json")
+                    Set httprequest.ContentCharset="UTF-8"
+                    //d httprequest.EntityBody.Write(patient.%ToJSON())
+                    d httprequest.EntityBody.Write(xx)
+                    set httprequest.Server ="fhir-test.for.ftprod.fr"
+                    set status = httprequest.Post("/fhir/Encounter")
+                          $$$LOGINFO("Data retrieved :"_status)
+                      D httprequest.HttpResponse.OutputToDevice() 
+                        $$$LOGINFO("test      "_status)
+
+                                  //$$$LOGINFO("resultat :"_Result.%ToJSON())
+                       $$$LOGINFO("test      "_httprequest.HttpResponse)
+                         $$$LOGINFO("test      "_httprequest.HttpResponse.Data.Read())
+                        $$$LOGINFO("test      "_httprequest.HttpResponse.StatusCode)
+                          $$$LOGINFO("test    wafik  ")
+              }
+
+
+    
+                  IF (val = "Appointment")
+              {
+
+                    set httprequest = ##class(%Net.HttpRequest).%New()
+                  set HttpResponse = ##class(%Net.HttpResponse).%New()
+                  $$$LOGINFO("Setting the server port... ")
+                //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+                  $$$LOGINFO("Setting the content-type... ") 
+                  //d httprequest.SetParam("username","lnauser")
+                  //d httprequest.SetParam("password","Sa@P4gxa5b?NcD9x")
+                  Set httprequest.Authorization=("Basic Zm9ydXNlcjpqSGJmYW9qdGdRJGU5eWFA")  
+                  //set httprequest.SSLConfiguration ="testwafik"  
+                  //Set httprequest.Https = 1
+
+                    Set httprequest.ContentType=("application/json")
+                    Set httprequest.ContentCharset="UTF-8"
+                    //d httprequest.EntityBody.Write(patient.%ToJSON())
+                    d httprequest.EntityBody.Write(xx)
+                    set httprequest.Server ="fhir-test.for.ftprod.fr"
+                    set status = httprequest.Post("/fhir/Appointment")
+                          $$$LOGINFO("Data retrieved :"_status)
+                      D httprequest.HttpResponse.OutputToDevice() 
+                        $$$LOGINFO("test      "_status)
+
+                                  //$$$LOGINFO("resultat :"_Result.%ToJSON())
+                       $$$LOGINFO("test      "_httprequest.HttpResponse)
+                         $$$LOGINFO("test      "_httprequest.HttpResponse.Data.Read())
+                        $$$LOGINFO("test      "_httprequest.HttpResponse.StatusCode)
+                          $$$LOGINFO("test    wafik  ")
+              }
+
+
+
+
+                  IF (val = "Organization")
+              {
+
+                    set httprequest = ##class(%Net.HttpRequest).%New()
+                  set HttpResponse = ##class(%Net.HttpResponse).%New()
+                  $$$LOGINFO("Setting the server port... ")
+                //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+                  $$$LOGINFO("Setting the content-type... ") 
+                  //d httprequest.SetParam("username","lnauser")
+                  //d httprequest.SetParam("password","Sa@P4gxa5b?NcD9x")
+                  Set httprequest.Authorization=("Basic Zm9ydXNlcjpqSGJmYW9qdGdRJGU5eWFA")  
+                  //set httprequest.SSLConfiguration ="testwafik"  
+                  //Set httprequest.Https = 1
+
+                    Set httprequest.ContentType=("application/json")
+                    Set httprequest.ContentCharset="UTF-8"
+                    //d httprequest.EntityBody.Write(patient.%ToJSON())
+                    d httprequest.EntityBody.Write(xx)
+                    set httprequest.Server ="fhir-test.for.ftprod.fr"
+                    set status = httprequest.Post("/fhir/Organization")
+                          $$$LOGINFO("Data retrieved :"_status)
+                      D httprequest.HttpResponse.OutputToDevice() 
+                        $$$LOGINFO("test      "_status)
+
+                                  //$$$LOGINFO("resultat :"_Result.%ToJSON())
+                       $$$LOGINFO("test      "_httprequest.HttpResponse)
+                         $$$LOGINFO("test      "_httprequest.HttpResponse.Data.Read())
+                        $$$LOGINFO("test      "_httprequest.HttpResponse.StatusCode)
+                          $$$LOGINFO("test    wafik  ")
+              }
+
+
+             IF (val = "Location")
+              {
+
+                    set httprequest = ##class(%Net.HttpRequest).%New()
+                  set HttpResponse = ##class(%Net.HttpResponse).%New()
+                  $$$LOGINFO("Setting the server port... ")
+                //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+                  $$$LOGINFO("Setting the content-type... ") 
+                  //d httprequest.SetParam("username","lnauser")
+                  //d httprequest.SetParam("password","Sa@P4gxa5b?NcD9x")
+                  Set httprequest.Authorization=("Basic Zm9ydXNlcjpqSGJmYW9qdGdRJGU5eWFA")  
+                  //set httprequest.SSLConfiguration ="testwafik"  
+                  //Set httprequest.Https = 1
+
+                    Set httprequest.ContentType=("application/json")
+                    Set httprequest.ContentCharset="UTF-8"
+                    //d httprequest.EntityBody.Write(patient.%ToJSON())
+                    d httprequest.EntityBody.Write(xx)
+                    set httprequest.Server ="fhir-test.for.ftprod.fr"
+                    set status = httprequest.Post("/fhir/Location")
+                          $$$LOGINFO("Data retrieved :"_status)
+                      D httprequest.HttpResponse.OutputToDevice() 
+                        $$$LOGINFO("test      "_status)
+
+                                  //$$$LOGINFO("resultat :"_Result.%ToJSON())
+                       $$$LOGINFO("test      "_httprequest.HttpResponse)
+                         $$$LOGINFO("test      "_httprequest.HttpResponse.Data.Read())
+                        $$$LOGINFO("test      "_httprequest.HttpResponse.StatusCode)
+                          $$$LOGINFO("test    wafik  ")
+              }
+
+
+
+
+
+
+
+
+ 
+           }
+
+
+          /*set xx={}.%FromJSON(stream)
+            set entry = xx.entry
+             $$$LOGINFO("entry :  " _entry.%ToJSON())
+
+
+        set cc = entry.%ToJSON()
+        set dynEntity = {}.%FromJSON(cc)
+       set itr = dynEntity.%GetIterator()
+        while itr.%GetNext(.key,.val) 
+        {
+             $$$LOGINFO("key :  " _key_"val : "_val)
+           set aa = val
+        }
+             $$$LOGINFO("entry :  " _aa.%ToJSON())
+
+
+             set dd = aa.%ToJSON()
+        set dynEntityd = {}.%FromJSON(dd)
+       set itr = dynEntityd.%GetIterator()
+        while itr.%GetNext(.key,.val) 
+        {
+             $$$LOGINFO("key :  " _key_"val : "_val)
+             set patient = val
+         
+        }
+
+      $$$LOGINFO("patient :  "_patient.%ToJSON())*/
+       
+
+
+
+        // set resource = json.resourceType
+        // $$$LOGINFO("jsonpatient :  " _resource.%ToJSON())
+
+
+            
+       /*********** Extract JSON message *************/
+              
+      /* set str=pFhirRequest.Payload 
+       $$$LOGINFO("JSON Message! Etape 1 : "_str)
+       
+       set text = ""
+       do str.Rewind()
+       while 'str.AtEnd {
+       set text = str.Read()
+       }     
+     $$$LOGINFO("JSON Message! Etape 2 : "_text)*/
+     
+     
+
+
+     /*********** Create a HTTP POST Request  *************/
+     /* d httprequest.EntityBody.Write(text)
+      set httprequest.ContentType  = ("application/json;charset=UTF-8")
+      set status = httprequest.Post("/fhirhl7v2demo/fhir/r4/")
+        $$$LOGINFO("Geting response from FHIR server... ")
+        Set Result = [].%FromJSON(httprequest.HttpResponse.Data)
+        $$$LOGINFO("Data retrieved :"_Result.%ToJSON()) **/
+      /*if $$$ISERR(status) {
+            //do $system.OBJ.DisplayError()     
+            $$$LOGINFO(" Bundle non crée !!! ")
+            
+      } else {
+            set response=httprequest.HttpResponse
+            
+            $$$LOGINFO(" Bundle crée ! ")
+            
+            $$$LOGINFO("Response is : " _httprequest.HttpResponse.Data)
+      }**/
+       //Quit:$$$ISERR(status)
+      
+       } 
+       Catch eException {
+        set tSC = eException.AsStatus()   
+       }
+            
+      Quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>JsonProcessDefaultData</DefaultData>
+<Data name="JsonProcessDefaultData">
+<Subscript>"JsonProcess"</Subscript>
+<Value name="1">
+<Value>ServerName</Value>
+</Value>
+<Value name="2">
+<Value>Port</Value>
+</Value>
+<Value name="3">
+<Value>SSLConfiguration</Value>
+</Value>
+<Value name="4">
+<Value>ContentType</Value>
+</Value>
+<Value name="5">
+<Value>Https</Value>
+</Value>
+<Value name="6">
+<Value>ContentCharset</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="User.JsontoHTTPPractionner">
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>67030,50940.733830844</TimeChanged>
+<TimeCreated>67030,50881.576294986</TimeCreated>
+
+<Property name="ServerName">
+<Type>%String</Type>
+</Property>
+
+<Property name="Port">
+<Type>%String</Type>
+</Property>
+
+<Property name="SSLConfiguration">
+<Type>%String</Type>
+</Property>
+
+<Property name="ContentType">
+<Type>%String</Type>
+</Property>
+
+<Property name="Https">
+<Type>%String</Type>
+</Property>
+
+<Property name="ContentCharset">
+<Type>%String</Type>
+</Property>
+
+<Parameter name="SETTINGS">
+<Default>ServerName,Port,SSLConfiguration,ContentType,Https,ContentCharset</Default>
+</Parameter>
+
+<Method name="OnRequest">
+<FormalSpec>pFhirRequest:HS.FHIRServer.Interop.Request,*pFhirResponse:Ens.StreamContainer</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+
+    $$$LOGINFO("wafik 1111111")
+      Set tSC = $$$OK
+      Try {
+
+        set stream = ##class(HS.SDA3.QuickStream).%OpenId(pFhirRequest.QuickStreamId)  
+      
+        set payload = ##class(%DynamicObject).%FromJSON(stream)
+    
+         $$$LOGINFO("json :  " _payload.%ToJSON())
+        set xx = payload.%ToJSON()
+
+
+
+
+
+
+
+
+
+          set cc = xx
+        set dynEntity = {}.%FromJSON(cc)
+       set itr = dynEntity.%GetIterator()
+        while itr.%GetNext(.key,.val) 
+        {
+             $$$LOGINFO("key :  " _key_"val : "_val)
+           set aa = val
+              $$$LOGINFO("valeur wafik mta3 if :  " _val)
+
+   //if seulon le type de la resource
+          
+
+                  IF (val = "Practitioner")
+              {
+
+                    set httprequest = ##class(%Net.HttpRequest).%New()
+                  set HttpResponse = ##class(%Net.HttpResponse).%New()
+                  $$$LOGINFO("Setting the server port... ")
+                //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+                  $$$LOGINFO("Setting the content-type... ") 
+                  //d httprequest.SetParam("username","lnauser")
+                  //d httprequest.SetParam("password","Sa@P4gxa5b?NcD9x")
+                  Set httprequest.Authorization=("Basic Zm9ydXNlcjpqSGJmYW9qdGdRJGU5eWFA")  
+                  //set httprequest.SSLConfiguration ="testwafik"  
+                  //Set httprequest.Https = 1
+
+                    Set httprequest.ContentType=("application/json")
+                    Set httprequest.ContentCharset="UTF-8"
+                    //d httprequest.EntityBody.Write(patient.%ToJSON())
+                    d httprequest.EntityBody.Write(xx)
+                    set httprequest.Server ="fhir-test.for.ftprod.fr"
+                    set status = httprequest.Post("/fhir/Practitioner")
+                          $$$LOGINFO("Data retrieved :"_status)
+                      D httprequest.HttpResponse.OutputToDevice() 
+                        $$$LOGINFO("test      "_status)
+
+                                  //$$$LOGINFO("resultat :"_Result.%ToJSON())
+                       $$$LOGINFO("test      "_httprequest.HttpResponse)
+                         $$$LOGINFO("test      "_httprequest.HttpResponse.Data.Read())
+                        $$$LOGINFO("test      "_httprequest.HttpResponse.StatusCode)
+                          $$$LOGINFO("test    wafik  ")
+              }
+              
+
+
+
+
+
+
+
+
+ 
+           }
+
+
+          /*set xx={}.%FromJSON(stream)
+            set entry = xx.entry
+             $$$LOGINFO("entry :  " _entry.%ToJSON())
+
+
+        set cc = entry.%ToJSON()
+        set dynEntity = {}.%FromJSON(cc)
+       set itr = dynEntity.%GetIterator()
+        while itr.%GetNext(.key,.val) 
+        {
+             $$$LOGINFO("key :  " _key_"val : "_val)
+           set aa = val
+        }
+             $$$LOGINFO("entry :  " _aa.%ToJSON())
+
+
+             set dd = aa.%ToJSON()
+        set dynEntityd = {}.%FromJSON(dd)
+       set itr = dynEntityd.%GetIterator()
+        while itr.%GetNext(.key,.val) 
+        {
+             $$$LOGINFO("key :  " _key_"val : "_val)
+             set patient = val
+         
+        }
+
+      $$$LOGINFO("patient :  "_patient.%ToJSON())*/
+       
+
+
+
+        // set resource = json.resourceType
+        // $$$LOGINFO("jsonpatient :  " _resource.%ToJSON())
+
+
+            
+       /*********** Extract JSON message *************/
+              
+      /* set str=pFhirRequest.Payload 
+       $$$LOGINFO("JSON Message! Etape 1 : "_str)
+       
+       set text = ""
+       do str.Rewind()
+       while 'str.AtEnd {
+       set text = str.Read()
+       }     
+     $$$LOGINFO("JSON Message! Etape 2 : "_text)*/
+     
+     
+
+
+     /*********** Create a HTTP POST Request  *************/
+     /* d httprequest.EntityBody.Write(text)
+      set httprequest.ContentType  = ("application/json;charset=UTF-8")
+      set status = httprequest.Post("/fhirhl7v2demo/fhir/r4/")
+        $$$LOGINFO("Geting response from FHIR server... ")
+        Set Result = [].%FromJSON(httprequest.HttpResponse.Data)
+        $$$LOGINFO("Data retrieved :"_Result.%ToJSON()) **/
+      /*if $$$ISERR(status) {
+            //do $system.OBJ.DisplayError()     
+            $$$LOGINFO(" Bundle non crée !!! ")
+            
+      } else {
+            set response=httprequest.HttpResponse
+            
+            $$$LOGINFO(" Bundle crée ! ")
+            
+            $$$LOGINFO("Response is : " _httprequest.HttpResponse.Data)
+      }**/
+       //Quit:$$$ISERR(status)
+      
+       } 
+       Catch eException {
+        set tSC = eException.AsStatus()   
+       }
+            
+      Quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>JsonProcessDefaultData</DefaultData>
+<Data name="JsonProcessDefaultData">
+<Subscript>"JsonProcess"</Subscript>
+<Value name="1">
+<Value>ServerName</Value>
+</Value>
+<Value name="2">
+<Value>Port</Value>
+</Value>
+<Value name="3">
+<Value>SSLConfiguration</Value>
+</Value>
+<Value name="4">
+<Value>ContentType</Value>
+</Value>
+<Value name="5">
+<Value>Https</Value>
+</Value>
+<Value name="6">
+<Value>ContentCharset</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="testforamtionpourpedro.transformationMFNtoSDA">
+<Super>Ens.DataTransformDTL</Super>
+<TimeChanged>67023,53366.65269627</TimeChanged>
+<TimeCreated>67016,48968.174036974</TimeCreated>
+<DependsOn>EnsLib.HL7.Message,HS.SDA3.Container</DependsOn>
+
+<Parameter name="IGNOREMISSINGSOURCE">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="REPORTERRORS">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="TREATEMPTYREPEATINGFIELDASNULL">
+<Default>0</Default>
+</Parameter>
+
+<XData name="DTL">
+<XMLNamespace>http://www.intersystems.com/dtl</XMLNamespace>
+<Data><![CDATA[
+<transform sourceClass='EnsLib.HL7.Message' targetClass='HS.SDA3.Container' sourceDocType='2.5:MFN_M02' create='new' language='objectscript' >
+<assign value='source.{MFEgrp().MFE:RecordLevelEventCode}' property='target.Encounters.(1)' action='set' disabled='1' />
+<foreach property='source.{MFEgrp()}' key='k1' >
+<assign value='source.{MFEgrp(k1).STF:StaffType(1)}' property='target.Encounters.(k1).AdmittingClinician.CareProviderType.Description' action='set' />
+<assign value='source.{MFEgrp(k1).STF:StaffIdentifierList(1).IdentifierTypeCode}' property='target.Encounters.(k1).AdmittingClinician.IdentifierTypeCode' action='set' />
+<assign value='source.{MFEgrp(k1).STF:StaffIdentifierList(1).IDNumber}' property='target.Encounters.(k1).AdmittingClinician.EId' action='set' />
+<assign value='source.{MFEgrp(k1).STF:StaffIdentifierList(1).IDNumber}' property='target.Encounters.(k1).AdmittingClinician.OtherIdentifiers.(1).Number' action='set' />
+<assign value='source.{MFEgrp(k1).STF:EMailAddress(1)}' property='target.Encounters.(k1).AdmittingClinician.ContactInfo.EmailAddress' action='set' />
+<assign value='source.{MFEgrp(k1).STF:Phone(1)}' property='target.Encounters.(k1).AdmittingClinician.ContactInfo.MobilePhoneNumber' action='set' />
+<assign value='source.{MFEgrp(k1).STF:StaffName(1).SecondandFurtherGivenNamesor}' property='target.Encounters.(k1).AdmittingClinician.Name.MiddleName' action='set' />
+<assign value='source.{MFEgrp(k1).STF:StaffName(1).FamilyName}' property='target.Encounters.(k1).AdmittingClinician.Name.FamilyName' action='set' />
+<assign value='source.{MFEgrp(k1).STF:StaffName(1).GivenName}' property='target.Encounters.(k1).AdmittingClinician.Name.GivenName' action='set' />
+<assign value='source.{MFEgrp(k1).STF:OfficeHomeAddressBirthplace(1).ZiporPostalCode}' property='target.Encounters.(k1).AdmittingClinician.Address.Zip.Code' action='set' />
+<assign value='source.{MFEgrp(k1).STF:OfficeHomeAddressBirthplace(1).StateorProvince}' property='target.Encounters.(k1).AdmittingClinician.Address.State.Code' action='set' />
+<assign value='source.{MFEgrp(k1).STF:OfficeHomeAddressBirthplace(1).City}' property='target.Encounters.(k1).AdmittingClinician.Address.City.Description' action='set' />
+<assign value='source.{MFEgrp(k1).STF:JobTitle}' property='target.Encounters.(k1).AdmittingClinician.Extension' action='set' />
+<assign value='source.{MFEgrp(k1).STF:OfficeHomeAddressBirthplace(1).OtherDesignation}' property='target.Encounters.(k1).AdmittingClinician.Address.Street' action='set' />
+<assign value='source.{MFEgrp(k1).STF:JobTitle}' property='target.Encounters.(k1).AdmittingClinician.Description' action='set' />
+</foreach>
+<assign value='"wafik123"' property='target.Patient.MPIID' action='set' />
+</transform>
+]]></Data>
+</XData>
+</Class>
+
+
+<Document name="EnsExportNotes.EnsExportProduction_2024-08-09 14-41-04_050+0.PTD"><ProjectTextDocument name="EnsExportNotes.EnsExportProduction_2024-08-09 14-41-04_050+0" description="Export Notes for export EnsExportProduction_2024-08-09 14-41-04_050+0">
+<![CDATA[<Deployment>
+<Creation>
+<Machine>2556A09813F6</Machine>
+<Instance>IRIS</Instance>
+<Namespace>TESTLNA2COPIE</Namespace>
+<SourceProduction>LNATESTPKG.FoundationProduction</SourceProduction>
+<Username>_SYSTEM</Username>
+<UTC>2024-08-09 14:43:33.851</UTC>
+</Creation>
+<Notes>
+</Notes>
+<Contents>
+<ExportProject>EnsExportProduction_2024-08-09 14-41-04_050+0</ExportProject>
+<Item num="1">DTLAppointment.SIUtoFHIR.CLS</Item>
+<Item num="2">DTLtest.HL7FHIR.SIUtofhirV2.CLS</Item>
+<Item num="3">DTLtest.HL7FHIR.hl7tofhirV2.CLS</Item>
+<Item num="4">DTLtest.HL7FHIRV2.CLS</Item>
+<Item num="5">DTLtest.HL7toFHIR.CLS</Item>
+<Item num="6">HS.Hub.Standalone.HL7.DTL.SubTransform.PD1ToSDA3.CLS</Item>
+<Item num="7">HS.Hub.Standalone.HL7.DTL.SubTransform.PIDToNameSDA3.CLS</Item>
+<Item num="8">HS.Hub.Standalone.HL7.DTL.SubTransform.PIDToSDA3.CLS</Item>
+<Item num="9">Settings:DTLAppointment.SIUtoFHIR.PTD</Item>
+<Item num="10">Settings:DTLPraticien.MFNtoFHIR.PTD</Item>
+<Item num="11">Settings:DTLtest.HL7toFHIR.PTD</Item>
+<Item num="12">Settings:HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process.PTD</Item>
+<Item num="13">Settings:HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process2.PTD</Item>
+<Item num="14">Settings:HS.FHIR.DTL.Util.HC.SDA3.FHIR.ProcessPractionner.PTD</Item>
+<Item num="15">Settings:HS.FHIRServer.Interop.Operation.PTD</Item>
+<Item num="16">Settings:HS.Util.Trace.Operations.PTD</Item>
+<Item num="17">Settings:InputADT.Patient.PTD</Item>
+<Item num="18">Settings:InputMFN.PTD</Item>
+<Item num="19">Settings:InputSIU.appointment.PTD</Item>
+<Item num="20">Settings:User.HL7toFHIR.PTD</Item>
+<Item num="21">Settings:User.JsontoHTTP.PTD</Item>
+<Item num="22">Settings:User.JsontoHTTP2.PTD</Item>
+<Item num="23">Settings:User.JsontoHTTPPractionner.PTD</Item>
+<Item num="24">User.HL7toFHIR.CLS</Item>
+<Item num="25">User.JsontoHTTP.CLS</Item>
+<Item num="26">User.JsontoHTTP2.CLS</Item>
+<Item num="27">User.JsontoHTTPPractionner.CLS</Item>
+<Item num="28">testforamtionpourpedro.transformationMFNtoSDA.CLS</Item>
+</Contents>
+<ProductionClassInExport></ProductionClassInExport>
+</Deployment>
+
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:DTLAppointment.SIUtoFHIR.PTD"><ProjectTextDocument name="Settings:DTLAppointment.SIUtoFHIR" description="Settings for DTLAppointment.SIUtoFHIR in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="DTLAppointment.SIUtoFHIR" Category="" ClassName="DTLAppointment.SIUtoFHIR" PoolSize="90" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:DTLPraticien.MFNtoFHIR.PTD"><ProjectTextDocument name="Settings:DTLPraticien.MFNtoFHIR" description="Settings for DTLPraticien.MFNtoFHIR in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="DTLPraticien.MFNtoFHIR" Category="" ClassName="DTLtest.HL7FHIRV2" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:DTLtest.HL7toFHIR.PTD"><ProjectTextDocument name="Settings:DTLtest.HL7toFHIR" description="Settings for DTLtest.HL7toFHIR in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="DTLtest.HL7toFHIR" Category="" ClassName="DTLtest.HL7toFHIR" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process.PTD"><ProjectTextDocument name="Settings:HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process" description="Settings for HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process" Category="" ClassName="HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Host" Name="FHIREndpoint">/csp/healthshare/lnatest/fhir/r4</Setting><Setting Target="Host" Name="FHIRMetadataSet">HL7v40 / FHIR R4 Core Specification</Setting><Setting Target="Host" Name="FormatFHIROutput">1</Setting><Setting Target="Host" Name="FullTransactionResponse">1</Setting><Setting Target="Host" Name="OutputToQuickStream">1</Setting><Setting Target="Host" Name="TargetConfigName">User.JsontoHTTP2</Setting><Setting Target="Host" Name="TransmissionMode">individual</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process2.PTD"><ProjectTextDocument name="Settings:HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process2" description="Settings for HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process2 in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process2" Category="" ClassName="HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process" PoolSize="1" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Host" Name="FHIREndpoint">/csp/healthshare/lnatest/fhir/r4</Setting><Setting Target="Host" Name="FHIRMetadataSet">HL7v40 / FHIR R4 Core Specification</Setting><Setting Target="Host" Name="FormatFHIROutput">1</Setting><Setting Target="Host" Name="FullTransactionResponse">1</Setting><Setting Target="Host" Name="OutputToQuickStream">1</Setting><Setting Target="Host" Name="TargetConfigName">HS.FHIRServer.Interop.Operation</Setting><Setting Target="Host" Name="TransmissionMode">transaction</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:HS.FHIR.DTL.Util.HC.SDA3.FHIR.ProcessPractionner.PTD"><ProjectTextDocument name="Settings:HS.FHIR.DTL.Util.HC.SDA3.FHIR.ProcessPractionner" description="Settings for HS.FHIR.DTL.Util.HC.SDA3.FHIR.ProcessPractionner in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="HS.FHIR.DTL.Util.HC.SDA3.FHIR.ProcessPractionner" Category="" ClassName="HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Host" Name="FHIREndpoint">/csp/healthshare/lnatest/fhir/r4</Setting><Setting Target="Host" Name="FHIRMetadataSet">HL7v40 / FHIR R4 Core Specification</Setting><Setting Target="Host" Name="FormatFHIROutput">1</Setting><Setting Target="Host" Name="FullTransactionResponse">1</Setting><Setting Target="Host" Name="OutputToQuickStream">1</Setting><Setting Target="Host" Name="TargetConfigName">User.JsontoHTTPPractionner</Setting><Setting Target="Host" Name="TransmissionMode">individual</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:HS.FHIRServer.Interop.Operation.PTD"><ProjectTextDocument name="Settings:HS.FHIRServer.Interop.Operation" description="Settings for HS.FHIRServer.Interop.Operation in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="HS.FHIRServer.Interop.Operation" Category="" ClassName="HS.FHIRServer.Interop.Operation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Host" Name="TraceOperations">*FULL*</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:HS.Util.Trace.Operations.PTD"><ProjectTextDocument name="Settings:HS.Util.Trace.Operations" description="Settings for HS.Util.Trace.Operations in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="HS.Util.Trace.Operations" Category="" ClassName="HS.Util.Trace.Operations" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:InputADT.Patient.PTD"><ProjectTextDocument name="Settings:InputADT.Patient" description="Settings for InputADT.Patient in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="InputADT.Patient" Category="" ClassName="EnsLib.HL7.Service.FileService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Adapter" Name="FileSpec">*</Setting><Setting Target="Host" Name="TargetConfigNames">DTLtest.HL7toFHIR</Setting><Setting Target="Adapter" Name="FilePath">/dur/iconfig/testpourLNA/INPUTADT/</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:InputMFN.PTD"><ProjectTextDocument name="Settings:InputMFN" description="Settings for InputMFN in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="InputMFN" Category="" ClassName="EnsLib.HL7.Service.FileService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Host" Name="MessageSchemaCategory">2.5</Setting><Setting Target="Adapter" Name="FilePath">/dur/iconfig/testpourLNA/INPUTMFN/</Setting><Setting Target="Adapter" Name="FileSpec">*</Setting><Setting Target="Host" Name="TargetConfigNames">DTLPraticien.MFNtoFHIR</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:InputSIU.appointment.PTD"><ProjectTextDocument name="Settings:InputSIU.appointment" description="Settings for InputSIU.appointment in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="InputSIU.appointment" Category="" ClassName="EnsLib.HL7.Service.FileService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Adapter" Name="FileSpec">*</Setting><Setting Target="Host" Name="TargetConfigNames">DTLAppointment.SIUtoFHIR</Setting><Setting Target="Adapter" Name="FilePath">/dur/iconfig/Nouveau dossier/InputSIU/</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:User.HL7toFHIR.PTD"><ProjectTextDocument name="Settings:User.HL7toFHIR" description="Settings for User.HL7toFHIR in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="User.HL7toFHIR" Category="" ClassName="User.HL7toFHIR" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:User.JsontoHTTP.PTD"><ProjectTextDocument name="Settings:User.JsontoHTTP" description="Settings for User.JsontoHTTP in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="User.JsontoHTTP" Category="" ClassName="User.JsontoHTTP" PoolSize="30" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:User.JsontoHTTP2.PTD"><ProjectTextDocument name="Settings:User.JsontoHTTP2" description="Settings for User.JsontoHTTP2 in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="User.JsontoHTTP2" Category="" ClassName="User.JsontoHTTP2" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:User.JsontoHTTPPractionner.PTD"><ProjectTextDocument name="Settings:User.JsontoHTTPPractionner" description="Settings for User.JsontoHTTPPractionner in Production LNATESTPKG.FoundationProduction">
+<![CDATA[<Item Name="User.JsontoHTTPPractionner" Category="" ClassName="User.JsontoHTTPPractionner" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""></Item>
+]]></ProjectTextDocument>
+</Document></Export>
